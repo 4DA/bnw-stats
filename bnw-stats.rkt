@@ -8,6 +8,9 @@
 (define *msgcount-criteria* 10)
 (define *comments-criteria* 20)
 (define *lastmsg-criteria* 15768000) ;; half year should be enough
+(define *default-fontsize* 20)
+(define *max-font-factor* (* *default-fontsize* 2))
+
 
 (struct global-ctx (userhash))
 (struct userinfo (name subscribers subscriptions messages-count
@@ -102,6 +105,17 @@
 
       (eprintf "~a: doesn't meet criteria\n" alice)))
 
+(define/contract (output-nodes-info ctx)
+  (-> global-ctx? void?)
+  (define max-subs (get-max-subscriptions ctx))
+
+  (for ([(name ui) (in-hash (global-ctx-userhash ctx))]
+        #:when (user-meets-criteria? ui))
+    (define subs-len (length (userinfo-subscribers ui)))
+    (printf "\"~a\" [fontsize=~a]\n" name
+            (round (+ *default-fontsize* (* *max-font-factor*
+                                            (/ subs-len max-subs)))))))
+
 (define/contract (output-dot ctx)
   (-> global-ctx? void?)
   (define userlist (get-all-usernames ctx))
@@ -110,7 +124,16 @@
   (printf "node [style = filled]\n")
   (for ([alice (in-list userlist)])
     (output-dot-for-user ctx alice))
+  (output-nodes-info ctx)
   (printf "}"))
+
+(define/contract (get-max-subscriptions ctx)
+  (-> global-ctx? integer?)
+  (for/fold ([max-subs 0]) ([(name ui) (in-hash (global-ctx-userhash ctx))])
+    (define sc (length (userinfo-subscribers ui)))
+    (if (> sc max-subs)
+        sc
+        max-subs)))
 
 (define (generate-dot-file ctx)
   (with-output-to-file *stats-filename*
@@ -118,7 +141,10 @@
     #:mode 'text
     #:exists 'truncate))
 
- (generate-dot-file *bnw-ctx*)
+;;(output-dot-for-user *bnw-ctx* "ninesigns")
+;;(output-nodes-info *bnw-ctx*)
+(generate-dot-file *bnw-ctx*)
+
 
 
 
