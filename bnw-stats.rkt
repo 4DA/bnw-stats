@@ -9,8 +9,6 @@
 (define *comments-criteria* 20)
 (define *lastmsg-criteria* 15768000) ;; half year should be enough
 
-
-
 (struct global-ctx (userhash))
 (struct userinfo (name subscribers subscriptions messages-count
                        regdate comments-count lastmessage-time) #:transparent)
@@ -53,9 +51,7 @@
 
 (define/contract (user-actually-exists? ctx name)
   (-> global-ctx? string? boolean?)
-
   (define jsl (make-request ctx (format "/api/userinfo?user=~a" name)))
-
   (eq? #t (hash-ref jsl 'ok)))
 
 (define/contract (request-user-info ctx name)
@@ -76,7 +72,6 @@
   (-> global-ctx? string? userinfo?)
 
   (define userhash (global-ctx-userhash ctx))
-
   (if (hash-has-key? userhash name)
       (hash-ref userhash name)
       (let ([uinfo (request-user-info ctx name)])
@@ -111,10 +106,10 @@
   (-> global-ctx? void?)
   (define userlist (get-all-usernames ctx))
   (printf "digraph {\n")
-  
+  (printf "graph [overlap = scale, outputorder = edgesfirst]\n")
+  (printf "node [style = filled]\n")
   (for ([alice (in-list userlist)])
     (output-dot-for-user ctx alice))
-      
   (printf "}"))
 
 (define (generate-dot-file ctx)
