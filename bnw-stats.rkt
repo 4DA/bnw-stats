@@ -159,7 +159,6 @@
   (eprintf "Retrieving user info.\n")
   (define userlist (get-all-usernames ctx))
   (define ul-len (length userlist))
-
   (define worksize (floor (/ ul-len *threads-num*)))
 
   (define thread-list
