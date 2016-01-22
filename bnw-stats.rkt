@@ -4,9 +4,8 @@
 (require net/http-client)
 (require json)
 
-
 (define *bnw-host-name* "bnw.im")
-(define *stats-filename* "/home/dc/bnwstats.dot")
+(define *stats-filename* "bnwstats.dot")
 (define *msgcount-criteria* 10)
 (define *comments-criteria* 20)
 (define *lastmsg-criteria* 15768000) ;; half year should be enough
@@ -24,9 +23,7 @@
   (-> global-ctx string? jsexpr?)
   (match-define-values (stat srv-info inpp)
                        (http-sendrecv *bnw-host-name* uri))
-
-  (define jsl (read-json inpp))
-  jsl)
+  (read-json inpp))
 
 (define/contract (get-users-by-page-num ctx page-num)
   (-> global-ctx? integer? list?)
